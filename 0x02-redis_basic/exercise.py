@@ -18,3 +18,23 @@ class Cache():
         DKey = str(uuid.uuid4())
         self._redis.set(DKey, data)
         return DKey
+
+    def get(self, key: str,
+            fn: Callable = None) -> Union[str, bytes, int, float]:
+        """Get data from Redis"""
+        data = self._redis.get(key)
+        return fn(data) if fn is not None else data
+
+    def get_str(self, key: str) -> str:
+        """Get string data from Redis"""
+        val = self.get(key)
+        if val is not None:
+            return val.decode('utf-8')
+        return ''
+
+    def get_int(self, key: str) -> int:
+        """Get integer data from Redis"""
+        val = self.get(key)
+        if val:
+            return int(val)
+        return
