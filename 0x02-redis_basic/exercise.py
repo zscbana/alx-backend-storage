@@ -4,7 +4,18 @@
 import redis
 import uuid
 from typing import Any, Callable, Union
+from functools import wraps
 
+
+def count_calls(method: Callable) -> Callable:
+    """ Counts the number of calls to a method"""
+    @wraps(method)
+    def invoker(self, *args, **kwargs) -> Any:
+        """ Invoker function"""
+        if isinstance(self._redis, redis.Redis):
+            self._redis.incr(method.__qualname__)
+        return method(self, *args, **kwargs)
+    return invoker
 
 class Cache():
     """ Cache class"""
