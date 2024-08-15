@@ -8,14 +8,16 @@ from functools import wraps
 
 
 def count_calls(method: Callable) -> Callable:
-    """ Counts the number of calls to a method"""
+    """ Counts the number of times a method is called"""
     @wraps(method)
-    def invoker(self, *args, **kwargs) -> Any:
-        """ Invoker function"""
+    def wrapper(self, *args, **kwargs) -> Any:
+        """given method after incrementing"""
+
         if isinstance(self._redis, redis.Redis):
             self._redis.incr(method.__qualname__)
         return method(self, *args, **kwargs)
-    return invoker
+
+    return wrapper
 
 
 def call_history(method: Callable) -> Callable:
@@ -71,6 +73,7 @@ class Cache():
         self._redis.set(DKey, data)
         return DKey
 
+    @call_history
     @count_calls
     def get(self, key: str,
             fn: Callable = None) -> Union[str, bytes, int, float]:
